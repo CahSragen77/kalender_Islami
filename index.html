@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalender Islami Modern & Alarm Ramadhan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- Menghubungkan ke File CSS Eksternal -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#FDFBF7] text-[#2C3E50] min-h-screen flex flex-col justify-between p-6 theme-transition" id="body-theme">
+
+    <!-- HEADER SECTION: Countdown & Jam Digital -->
+    <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+        <!-- Kiri Atas: Hitung Mundur -->
+        <div class="bg-white/80 dark:bg-black/20 p-4 rounded-2xl shadow-sm border border-[#D4AF37]/30 text-center sm:text-left theme-transition">
+            <p class="text-xs uppercase tracking-wider text-gray-500" id="countdown-label">Menuju Waktu Shalat</p>
+            <div class="text-2xl font-bold text-[#D4AF37] animate-pulse" id="countdown-timer">00:00:00</div>
+            <p class="text-xs text-gray-400 mt-1" id="next-prayer-name">-</p>
+        </div>
+
+        <!-- Kanan Atas: Jam Digital & Audio Control -->
+        <div class="text-center sm:text-right">
+            <div class="text-3xl font-extrabold tracking-tight" id="digital-clock">00:00:00</div>
+            <div class="text-sm text-gray-500" id="current-date-text">Memuat tanggal...</div>
+            <div class="mt-2 flex gap-2 justify-center sm:justify-end text-xs">
+                <button onclick="testAudio()" class="px-2 py-1 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded hover:bg-[#D4AF37]/20 transition">
+                    <i class="fa-solid fa-volume-high mr-1"></i> Tes Suara
+                </button>
+                <button onclick="toggleMute()" id="mute-btn" class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 transition">
+                    <i class="fa-solid fa-bell"></i> Suara Aktif
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN SECTION: Kalender Berornamen Islami -->
+    <main class="max-w-md mx-auto w-full bg-white dark:bg-zinc-900/90 p-6 rounded-3xl shadow-xl islamic-border theme-transition my-auto relative">
+        <!-- Ornamen Sudut Islami -->
+        <div class="absolute top-2 left-2 text-[#D4AF37]/40 text-xs">✦</div>
+        <div class="absolute top-2 right-2 text-[#D4AF37]/40 text-xs">✦</div>
+        <div class="absolute bottom-2 left-2 text-[#D4AF37]/40 text-xs">✦</div>
+        <div class="absolute bottom-2 right-2 text-[#D4AF37]/40 text-xs">✦</div>
+
+        <!-- Header Navigasi Kalender -->
+        <div class="flex justify-between items-center mb-6 px-2">
+            <button onclick="changeMonth(-1)" class="text-gray-400 hover:text-[#D4AF37] transition"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="text-center">
+                <h2 class="text-xl font-bold tracking-wide" id="calendar-month-year">-</h2>
+                <p class="text-xs text-[#D4AF37] font-semibold mt-1" id="hijri-calendar-text">-</p>
+            </div>
+            <button onclick="changeMonth(1)" class="text-gray-400 hover:text-[#D4AF37] transition"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Grid Nama Hari -->
+        <div class="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-gray-400 mb-2">
+            <div>Ahd</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+        </div>
+        
+        <!-- Grid Hari (Akan diisi oleh JS) -->
+        <div class="grid grid-cols-7 gap-2 text-center text-sm font-medium" id="calendar-days"></div>
+
+        <!-- Tampilan Jadwal Shalat Hari Ini -->
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-zinc-800 grid grid-cols-5 gap-1 text-center text-xs" id="prayer-times-grid">
+            <div class="p-1 rounded transition" id="p-Subuh"><p class="font-bold">Subuh</p><p class="text-gray-500" id="time-Subuh">-</p></div>
+            <div class="p-1 rounded transition" id="p-Dzuhur"><p class="font-bold">Dzuhur</p><p class="text-gray-500" id="time-Dzuhur">-</p></div>
+            <div class="p-1 rounded transition" id="p-Ashar"><p class="font-bold">Ashar</p><p class="text-gray-500" id="time-Ashar">-</p></div>
+            <div class="p-1 rounded transition" id="p-Maghrib"><p class="font-bold">Maghrib</p><p class="text-gray-500" id="time-Maghrib">-</p></div>
+            <div class="p-1 rounded transition" id="p-Isya"><p class="font-bold">Isya</p><p class="text-gray-500" id="time-Isya">-</p></div>
+        </div>
+    </main>
+
+    <!-- FOOTER SECTION: Hak Cipta Kolaborasi -->
+    <footer class="text-center text-xs text-gray-400 mt-8 pt-4 border-t border-gray-100 dark:border-zinc-800 theme-transition">
+        <p>Co-created by <span class="font-bold text-[#D4AF37]">Yudi 'Andrew'</span> & <span class="italic">AI Collaborator</span></p>
+        <p class="mt-1">&copy; 2026 All Rights Reserved.</p>
+    </footer>
+
+    <!-- TOMBOL WHATSAPP MENGAMBANG -->
+    <a href="https://wa.me" 
+       target="_blank" 
+       class="whatsapp-float bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 group flex items-center justify-center">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+        <span class="absolute right-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Tertarik Bekerjasama?
+        </span>
+    </a>
+
+    <!-- Menghubungkan ke File JS Eksternal -->
+    <script src="script.js"></script>
+</body>
+</html>
