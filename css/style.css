@@ -1,0 +1,31 @@
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: background-color 1s ease, color 1s ease;
+}
+
+/* Ornamen Klasik Ganda khas Seni Islami */
+.islamic-border {
+    border: 4px double #D4AF37;
+    position: relative;
+}
+
+/* Animasi & Transisi Tema */
+.theme-transition {
+    transition: all 0.5s ease-in-out;
+}
+
+/* Posisi Tombol WA */
+.whatsapp-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+/* Animasi Denyut Emas pada Waktu Aktif */
+.active-prayer {
+    background-color: rgba(212, 175, 55, 0.15) !important;
+    border: 1px solid #D4AF37;
+    color: #D4AF37;
+    font-weight: bold;
+}
