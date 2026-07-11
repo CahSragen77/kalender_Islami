@@ -52,19 +52,21 @@ function fetchPrayerTimesAndHijri() {
                                 Imsak: timings.Imsak
                             };
                             
+                            // PERBAIKAN: Mengambil nama bulan dan tahun Hijriah asli dari API secara dinamis
                             const hijri = data.data.date.hijri;
-                            document.getElementById('hijri-calendar-text').innerText = `${hijri.day} ${hijri.month.id} ${hijri.year} H`;
+                            // Contoh hasil: "Safar 1448 H" atau "Muharram 1448 H"
+                            document.getElementById('hijri-calendar-text').innerText = `${hijri.month.id} ${hijri.year} H`;
+                            
                             renderPrayerTimesTable();
                         }
                     })
                     .catch(error => console.error("Gagal mengambil data jadwal shalat:", error));
 
-                // B. Panggil API Geocoding untuk Mengubah Koordinat Menjadi Nama Kota/Kabupaten
+                // B. Panggil API Geocoding untuk Nama Kota
                 const geoUrl = `https://bigdatacloud.net{latitude}&longitude=${longitude}&localityLanguage=id`;
                 fetch(geoUrl)
                     .then(response => response.json())
                     .then(geoData => {
-                        // Ambil nama kota atau kabupaten (City / Regency)
                         const cityName = geoData.city || geoData.locality || "Lokasi Terdeteksi";
                         document.getElementById('user-location-text').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${cityName}`;
                     })
@@ -81,6 +83,7 @@ function fetchPrayerTimesAndHijri() {
         fetchFallbackPrayerTimes();
     }
 }
+
 
 // Fungsi Cadangan Jika GPS Dimatikan Pengguna (Default: Jakarta)
 function fetchFallbackPrayerTimes() {
