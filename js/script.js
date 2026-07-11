@@ -173,42 +173,87 @@ function resetPrayerHighlights() {
     });
 }
 
-// 5. Otomatisasi Generator Kalender Masehi
+// 5. Otomatisasi Generator Kalender Ganda (Masehi & Hijriah Kecil)
 function generateCalendar() {
     const daysContainer = document.getElementById('calendar-days');
     const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     
-    document.getElementById('calendar-month-year').innerText = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    document.getElementById('calendar-month-year').innerText = `${months[month]} ${year}`;
     
     const today = new Date();
     document.getElementById('current-date-text').innerText = today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     daysContainer.innerHTML = "";
     
-    const firstDayIndex = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-    const totalDays = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
 
+    // Mengisi ruang kosong tanggal bulan sebelumnya
     for (let x = 0; x < firstDayIndex; x++) {
         const emptyEl = document.createElement('div');
         daysContainer.appendChild(emptyEl);
     }
 
+    // Mengisi angka tanggal Masehi & menghitung estimasi tanggal Hijriah di dalamnya
     for (let i = 1; i <= totalDays; i++) {
         const dayEl = document.createElement('div');
-        dayEl.innerText = i;
-        dayEl.className = "p-2 rounded-lg hover:bg-[#D4AF37]/20 cursor-pointer transition";
+        dayEl.className = "p-2 rounded-lg hover:bg-[#D4AF37]/20 cursor-pointer transition flex flex-col items-center justify-center relative min-h-[50px]";
         
-        if (i === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
-            dayEl.className = "p-2 bg-[#D4AF37] text-white rounded-lg font-bold shadow-md";
+        // A. Angka Utama (Masehi)
+        const masehiSpan = document.createElement('span');
+        masehiSpan.innerText = i;
+        masehiSpan.className = "text-base font-semibold";
+        dayEl.appendChild(masehiSpan);
+
+        // B. Angka Kecil di Pojok (Estimasi Hijriah)
+        // Kita gunakan rumus siklus konversi berbasis kalender aritmatika tabular untuk performa offline yang cepat
+        const hDate = getEstimatedHijriDate(year, month, i);
+        const hijriSpan = document.createElement('span');
+        hijriSpan.innerText = hDate;
+        hijriSpan.className = "text-[10px] text-[#D4AF37] dark:text-[#E6C65B] mt-0.5 font-light";
+        
+        dayEl.appendChild(hijriSpan);
+        
+        // Highlight jika hari ini
+        if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            dayEl.className = "p-2 bg-[#D4AF37] text-white rounded-lg font-bold shadow-md flex flex-col items-center justify-center min-h-[50px]";
+            hijriSpan.className = "text-[10px] text-white/90 mt-0.5 font-medium";
         }
+        
         daysContainer.appendChild(dayEl);
     }
 }
 
-function changeMonth(direction) {
-    currentDate.setMonth(currentDate.getMonth() + direction);
-    generateCalendar();
+// Fungsi Matematika Pembantu untuk Konversi Tanggal Hijriah secara Offline & Cepat
+function getEstimatedHijriDate(year, month, day) {
+    // Basis data penanggalan untuk sinkronisasi tahun 2026/2027
+    const mDate = new Date(year, month, day);
+    const jd = Math.floor(mDate.getTime() / 86400000) + 2440587.5;
+    const epochAsg = 1948439.5;
+    const cyc = 10631;
+    const shift = 8.5;
+    
+    let z = Math.floor(jd - epochAsg);
+    let cycCount = Math.floor((z + shift) / cyc);
+    z = z - cycCount * cyc;
+    
+    let j = Math.floor((z + shift) / 355);
+    z = z - j * 355;
+    
+    let hYear = cycCount * 30 + j;
+    let hMonth = Math.floor((z + 30) / 29.5);
+    if (hMonth > 12) hMonth = 12;
+    
+    // Menghitung sisa hari untuk menentukan tanggal Hijriah saat ini
+    const hDay = Math.floor(z - Math.floor(hMonth * 29.5 - 28.9) + 2);
+    
+    // Mengembalikan hanya angka tanggalnya saja (1-30) untuk ditaruh di dalam kotak
+    return hDay > 30 ? 1 : (hDay <= 0 ? 29 : hDay);
 }
+
 
 // 6. Sistem Audio & Detektor Alarm Bunyi Real-time
 function triggerAlarmNotification(prayerName) {
