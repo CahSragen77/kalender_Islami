@@ -27,25 +27,22 @@ function initClockAndTheme() {
     }
 }
 
-// 2. Mengambil Data Waktu Shalat & Hijriah dari Aladhan API Berdasarkan Lokasi GPS
+// 2. Mengambil Data Waktu Shalat, Hijriah, & Nama Kota Berdasarkan GPS
 function fetchPrayerTimesAndHijri() {
     if (navigator.geolocation) {
-        // Meminta izin lokasi otomatis dari browser pengguna
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
                 const timestamp = Math.floor(Date.now() / 1000);
                 
-                // Panggil API Aladhan dengan metode kalkulasi Kemenag RI / MABIMS (Metode ID: 11 atau otomatis berdasarkan koordinat)
+                // A. Panggil API Aladhan untuk Jadwal Shalat & Hijriah
                 const apiUrl = `https://aladhan.com{timestamp}?latitude=${latitude}&longitude=${longitude}&method=11`;
-                
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(data => {
                         if (data.code === 200) {
                             const timings = data.data.timings;
-                            // Ambil waktu shalat utama saja
                             prayerTimes = {
                                 Subuh: timings.Fajr,
                                 Dzuhur: timings.Dhuhr,
@@ -55,17 +52,27 @@ function fetchPrayerTimesAndHijri() {
                                 Imsak: timings.Imsak
                             };
                             
-                            // Perbarui Teks Kalender Hijriah Asli dari API
                             const hijri = data.data.date.hijri;
                             document.getElementById('hijri-calendar-text').innerText = `${hijri.day} ${hijri.month.id} ${hijri.year} H`;
-                            
                             renderPrayerTimesTable();
                         }
                     })
-                    .catch(error => console.error("Gagal mengambil data API:", error));
+                    .catch(error => console.error("Gagal mengambil data jadwal shalat:", error));
+
+                // B. Panggil API Geocoding untuk Mengubah Koordinat Menjadi Nama Kota/Kabupaten
+                const geoUrl = `https://bigdatacloud.net{latitude}&longitude=${longitude}&localityLanguage=id`;
+                fetch(geoUrl)
+                    .then(response => response.json())
+                    .then(geoData => {
+                        // Ambil nama kota atau kabupaten (City / Regency)
+                        const cityName = geoData.city || geoData.locality || "Lokasi Terdeteksi";
+                        document.getElementById('user-location-text').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${cityName}`;
+                    })
+                    .catch(() => {
+                        document.getElementById('user-location-text').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> Lokasi Aktif`;
+                    });
             },
             (error) => {
-                // Jika pengguna menolak izin lokasi, gunakan koordinat default (Jakarta sebagai cadangan)
                 console.warn("Izin lokasi ditolak, menggunakan lokasi cadangan (Jakarta).");
                 fetchFallbackPrayerTimes();
             }
@@ -96,9 +103,13 @@ function fetchFallbackPrayerTimes() {
                 const hijri = data.data.date.hijri;
                 document.getElementById('hijri-calendar-text').innerText = `${hijri.day} ${hijri.month.id} ${hijri.year} H`;
                 renderPrayerTimesTable();
+                
+                // Set kota cadangan di UI
+                document.getElementById('user-location-text').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> DKI Jakarta (Cadangan)`;
             }
         });
 }
+
 
 // 3. Logika Hitung Mundur Mendekati Waktu Shalat/Imsak/Berbuka Asli
 function updateCountdown(now) {
